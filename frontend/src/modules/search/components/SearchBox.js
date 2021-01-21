@@ -13,6 +13,7 @@ import { NAME as STATS_NAME } from 'core/stats';
 import * as search from 'modules/search';
 import * as unsavedchanges from 'modules/unsavedchanges';
 
+import store from 'store';
 import { FILTERS_STATUS, FILTERS_EXTRA } from '../constants';
 import FiltersPanel from './FiltersPanel';
 
@@ -32,8 +33,6 @@ type Props = {|
     project: ProjectState,
     stats: Stats,
     router: Object,
-    unsavedChangesExist: boolean,
-    unsavedChangesIgnored: boolean,
 |};
 
 type InternalProps = {|
@@ -390,10 +389,13 @@ export class SearchBoxBase extends React.Component<InternalProps, State> {
     };
 
     update = () => {
+        const state = store.getState();
+        const unsavedChangesExist = state[unsavedchanges.NAME].exist;
+        const unsavedChangesIgnored = state[unsavedchanges.NAME].ignored;
         this.props.dispatch(
             unsavedchanges.actions.check(
-                this.props.unsavedChangesExist,
-                this.props.unsavedChangesIgnored,
+                unsavedChangesExist,
+                unsavedChangesIgnored,
                 this._update,
             ),
         );
@@ -502,8 +504,6 @@ const mapStateToProps = (state: Object): Props => {
         project: state[project.NAME],
         stats: state[STATS_NAME],
         router: state.router,
-        unsavedChangesExist: state[unsavedchanges.NAME].exist,
-        unsavedChangesIgnored: state[unsavedchanges.NAME].ignored,
     };
 };
 

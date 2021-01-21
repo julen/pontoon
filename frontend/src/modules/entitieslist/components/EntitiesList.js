@@ -15,6 +15,7 @@ import * as user from 'core/user';
 import * as batchactions from 'modules/batchactions';
 import * as unsavedchanges from 'modules/unsavedchanges';
 
+import store from 'store';
 import Entity from './Entity';
 import { SkeletonLoader } from 'core/loaders';
 
@@ -32,8 +33,6 @@ type Props = {|
     locale: Locale,
     parameters: NavigationParams,
     router: Object,
-    unsavedChangesExist: boolean,
-    unsavedChangesIgnored: boolean,
 |};
 
 type InternalProps = {|
@@ -210,10 +209,13 @@ export class EntitiesListBase extends React.Component<InternalProps> {
     selectEntity = (entity: EntityType, replaceHistory?: boolean) => {
         const { dispatch, router } = this.props;
 
+        const state = store.getState();
+        const unsavedChangesExist = state[unsavedchanges.NAME].exist;
+        const unsavedChangesIgnored = state[unsavedchanges.NAME].ignored;
         dispatch(
             unsavedchanges.actions.check(
-                this.props.unsavedChangesExist,
-                this.props.unsavedChangesIgnored,
+                unsavedChangesExist,
+                unsavedChangesIgnored,
                 () => {
                     dispatch(batchactions.actions.resetSelection());
                     dispatch(editor.actions.reset());
@@ -401,8 +403,6 @@ const mapStateToProps = (state: Object): Props => {
         parameters: navigation.selectors.getNavigationParams(state),
         locale: state[locale.NAME],
         router: state.router,
-        unsavedChangesExist: state[unsavedchanges.NAME].exist,
-        unsavedChangesIgnored: state[unsavedchanges.NAME].ignored,
     };
 };
 

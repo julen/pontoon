@@ -12,6 +12,8 @@ import * as project from 'core/project';
 import * as resource from 'core/resource';
 import * as unsavedchanges from 'modules/unsavedchanges';
 
+import store from 'store';
+
 import type { Locale } from 'core/locale';
 import type { NavigationParams } from 'core/navigation';
 import type { ProjectState } from 'core/project';
@@ -22,8 +24,6 @@ type Props = {|
     parameters: NavigationParams,
     project: ProjectState,
     resources: ResourcesState,
-    unsavedChangesExist: boolean,
-    unsavedChangesIgnored: boolean,
 |};
 
 type InternalProps = {|
@@ -79,10 +79,13 @@ export class NavigationBase extends React.Component<InternalProps> {
     navigateToPath = (path: string) => {
         const { dispatch } = this.props;
 
+        const state = store.getState();
+        const unsavedChangesExist = state[unsavedchanges.NAME].exist;
+        const unsavedChangesIgnored = state[unsavedchanges.NAME].ignored;
         dispatch(
             unsavedchanges.actions.check(
-                this.props.unsavedChangesExist,
-                this.props.unsavedChangesIgnored,
+                unsavedChangesExist,
+                unsavedChangesIgnored,
                 () => {
                     dispatch(push(path));
                 },
@@ -139,8 +142,6 @@ const mapStateToProps = (state: Object): Props => {
         parameters: navigation.selectors.getNavigationParams(state),
         project: state[project.NAME],
         resources: state[resource.NAME],
-        unsavedChangesExist: state[unsavedchanges.NAME].exist,
-        unsavedChangesIgnored: state[unsavedchanges.NAME].ignored,
     };
 };
 

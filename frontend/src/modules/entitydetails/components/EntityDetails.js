@@ -23,6 +23,7 @@ import * as teamcomments from 'modules/teamcomments';
 import * as unsavedchanges from 'modules/unsavedchanges';
 import * as notification from 'core/notification';
 
+import store from 'store';
 import EditorSelector from './EditorSelector';
 import EntityNavigation from './EntityNavigation';
 import Metadata from './Metadata';
@@ -54,8 +55,6 @@ type Props = {|
     pluralForm: number,
     router: Object,
     selectedEntity: Entity,
-    unsavedChangesExist: boolean,
-    unsavedChangesIgnored: boolean,
     user: UserState,
     users: UserState,
 |};
@@ -239,10 +238,13 @@ export class EntityDetailsBase extends React.Component<InternalProps, State> {
     goToNextEntity = () => {
         const { dispatch, nextEntity, router } = this.props;
 
+        const state = store.getState();
+        const unsavedChangesExist = state[unsavedchanges.NAME].exist;
+        const unsavedChangesIgnored = state[unsavedchanges.NAME].ignored;
         dispatch(
             unsavedchanges.actions.check(
-                this.props.unsavedChangesExist,
-                this.props.unsavedChangesIgnored,
+                unsavedChangesExist,
+                unsavedChangesIgnored,
                 () => {
                     dispatch(
                         navigation.actions.updateEntity(
@@ -259,10 +261,13 @@ export class EntityDetailsBase extends React.Component<InternalProps, State> {
     goToPreviousEntity = () => {
         const { dispatch, previousEntity, router } = this.props;
 
+        const state = store.getState();
+        const unsavedChangesExist = state[unsavedchanges.NAME].exist;
+        const unsavedChangesIgnored = state[unsavedchanges.NAME].ignored;
         dispatch(
             unsavedchanges.actions.check(
-                this.props.unsavedChangesExist,
-                this.props.unsavedChangesIgnored,
+                unsavedChangesExist,
+                unsavedChangesIgnored,
                 () => {
                     dispatch(
                         navigation.actions.updateEntity(
@@ -279,10 +284,13 @@ export class EntityDetailsBase extends React.Component<InternalProps, State> {
     navigateToPath = (path: string) => {
         const { dispatch } = this.props;
 
+        const state = store.getState();
+        const unsavedChangesExist = state[unsavedchanges.NAME].exist;
+        const unsavedChangesIgnored = state[unsavedchanges.NAME].ignored;
         dispatch(
             unsavedchanges.actions.check(
-                this.props.unsavedChangesExist,
-                this.props.unsavedChangesIgnored,
+                unsavedChangesExist,
+                unsavedChangesIgnored,
                 () => {
                     dispatch(push(path));
                 },
@@ -365,12 +373,16 @@ export class EntityDetailsBase extends React.Component<InternalProps, State> {
             selectedEntity,
             dispatch,
         } = this.props;
+
+        const state = store.getState();
+        const unsavedChangesExist = state[unsavedchanges.NAME].exist;
+        const unsavedChangesIgnored = state[unsavedchanges.NAME].ignored;
         // No need to check for unsaved changes in `EditorBase.updateTranslationStatus()`,
         // because it cannot be triggered for the use case of bug 1508474.
         dispatch(
             unsavedchanges.actions.check(
-                this.props.unsavedChangesExist,
-                this.props.unsavedChangesIgnored,
+                unsavedChangesExist,
+                unsavedChangesIgnored,
                 () => {
                     dispatch(
                         history.actions.updateStatus(
@@ -493,8 +505,6 @@ const mapStateToProps = (state: Object): Props => {
         pluralForm: plural.selectors.getPluralForm(state),
         router: state.router,
         selectedEntity: entities.selectors.getSelectedEntity(state),
-        unsavedChangesExist: state[unsavedchanges.NAME].exist,
-        unsavedChangesIgnored: state[unsavedchanges.NAME].ignored,
         user: state[user.NAME],
         users: state[user.NAME],
     };
