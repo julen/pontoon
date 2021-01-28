@@ -31,7 +31,7 @@ export function createReduxStore(initialState = {}) {
 export function mountComponentWithStore(Component, store, props = {}) {
     return mount(
         <Provider store={store}>
-            <ConnectedRouter history={history}>
+            <ConnectedRouter history={history} noInitialPop>
                 <Component {...props} />
             </ConnectedRouter>
         </Provider>,
